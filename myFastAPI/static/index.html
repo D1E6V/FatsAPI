@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Interface</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #4895ef;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --text-color: #333;
+            --text-light: #666;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        .chat-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 1.5rem;
+            background-color: var(--primary-light);
+            color: white;
+        }
+
+        .chat-header h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header h2 i {
+            margin-right: 10px;
+        }
+
+        .chat-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        button i {
+            margin-right: 8px;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(67, 97, 238, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            margin-top: 1rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .error {
+            display: none;
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--error-color);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            font-weight: 500;
+        }
+
+        .response-container {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .response-header {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .response-header i {
+            margin-right: 8px;
+        }
+
+        .response-content {
+            background-color: white;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .question-type-info {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(67, 97, 238, 0.1);
+            border-radius: 8px;
+        }
+
+        .question-type-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .question-type-info p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1.5rem 0;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 0 1rem;
+                margin: 1.5rem auto;
+            }
+            
+            .chat-header, .chat-body {
+                padding: 1.2rem;
+            }
+            
+            button {
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI Chat Interface</h1>
+        <p>Ask questions and get intelligent responses from our AI assistant</p>
+    </div>
+    
+    <div class="container">
+        <div class="chat-card">
+            <div class="chat-header">
+                <h2><i class="fas fa-comment-dots"></i> Chat with AI</h2>
+            </div>
+            
+            <div class="chat-body">
+                <form id="chatForm">
+                    <div class="form-group">
+                        <label for="userQuestion">What would you like to ask?</label>
+                        <textarea id="userQuestion" name="userQuestion" placeholder="Type your question here..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="questionType">Select Question Type:</label>
+                        <select id="questionType" name="questionType" required>
+                            <option value="story_generator">Story Generator</option>
+                            <option value="code_explainer">Code Explainer</option>
+                            <option value="recipe_suggester">Recipe Suggester</option>
+                            <option value="schedule_lookup">Schedule Lookup</option>
+                            <option value="small_talk" selected>Small Talk</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="question-type-info" id="questionTypeInfo">
+                        <h3>About this question type</h3>
+                        <p id="questionTypeDescription">Engage in casual conversation with the AI assistant.</p>
+                    </div>
+                    
+                    <div class="button-container">
+                        <button type="submit"><i class="fas fa-paper-plane"></i> Send Request</button>
+                    </div>
+                </form>
+                
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Getting response from AI...</p>
+                </div>
+                
+                <div class="error" id="error"></div>
+                
+                <div class="response-container" id="responseContainer">
+                    <div class="response-header">
+                        <i class="fas fa-robot"></i> AI Response
+                    </div>
+                    <div class="response-content" id="response"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>&copy; 2025 AI Chat Interface | Powered by Gemini API</p>
+    </div>
+    
+    <script>
+        // Question type descriptions
+        const questionTypeDescriptions = {
+            "story_generator": "Generate creative and engaging stories based on your input. Perfect for entertainment or creative writing inspiration.",
+            "code_explainer": "Get clear explanations of code snippets. Ideal for learning programming concepts or understanding complex code.",
+            "recipe_suggester": "Receive recipe suggestions based on ingredients or dietary preferences. Great for meal planning and cooking inspiration.",
+            "schedule_lookup": "Find information about TV schedules and programming. Useful for planning your viewing time.",
+            "small_talk": "Engage in casual conversation with the AI assistant. Perfect for chitchat or testing the AI's conversational abilities.",
+            "other": "Ask any other type of question that doesn't fit into the categories above."
+        };
+        
+        // Show description based on selected question type
+        const questionTypeSelect = document.getElementById('questionType');
+        const questionTypeInfo = document.getElementById('questionTypeInfo');
+        const questionTypeDescription = document.getElementById('questionTypeDescription');
+        
+        questionTypeSelect.addEventListener('change', function() {
+            const selectedType = this.value;
+            questionTypeDescription.textContent = questionTypeDescriptions[selectedType];
+            questionTypeInfo.style.display = 'block';
+        });
+        
+        // Set initial description
+        questionTypeDescription.textContent = questionTypeDescriptions[questionTypeSelect.value];
+        questionTypeInfo.style.display = 'block';
+        
+        // Form submission
+        document.getElementById('chatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const userQuestion = document.getElementById('userQuestion').value;
+            const questionType = document.getElementById('questionType').value;
+            
+            const responseContainer = document.getElementById('responseContainer');
+            const responseDiv = document.getElementById('response');
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            
+            // Clear previous response and error
+            responseContainer.style.display = 'none';
+            errorDiv.style.display = 'none';
+            
+            // Show loading indicator
+            loadingDiv.style.display = 'block';
+            
+            try {
+                // Prepare the request payload
+                const payload = {
+                    user_question: userQuestion,
+                    type_of_question: questionType
+                };
+                
+                // Send the request
+                const response = await fetch('http://localhost:8000/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                // Hide loading indicator
+                loadingDiv.style.display = 'none';
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Display the response
+                    responseDiv.textContent = data.response;
+                    responseContainer.style.display = 'block';
+                    
+                    // Scroll to response
+                    responseContainer.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    const errorText = await response.text();
+                    errorDiv.textContent = `Error: ${response.status} - ${errorText}`;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                // Hide loading indicator
+                loadingDiv.style.display = 'none';
+                
+                // Display error message
+                errorDiv.textContent = `Request failed: ${error.message}`;
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
